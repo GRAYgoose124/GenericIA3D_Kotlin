@@ -16,7 +16,7 @@ class GenericAgent(var position: Vec3D, var velocity: Vec3D, protected val paren
         lastForces = ArrayList()
         lastNeighbors = neighborhood(group)
 
-        if (lastNeighbors.size < 1) return
+        if (lastNeighbors.size <= 0) return
         for (i in forces.ops.indices) {
             if (!parent_sim.so.FORCES_ON[i]) continue
             val force = forces.ops[i](this, lastNeighbors)
@@ -25,7 +25,7 @@ class GenericAgent(var position: Vec3D, var velocity: Vec3D, protected val paren
         }
 
         velocity.addSelf(acceleration.normalizeTo(parent_sim.so.MAX_SPEED))
-        velocity.limit(parent_sim.so.MAX_SPEED)
+        velocity.normalizeTo(parent_sim.so.MAX_SPEED)
 
         position.addSelf(velocity)
 

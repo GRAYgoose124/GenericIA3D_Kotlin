@@ -4,7 +4,7 @@ This is a project I'm working on to act as a base for more complex intelligent a
 
 ## jars (Processing reqs)
 
-This project uses javasdk1.8+
+This project uses javasdk1.8+ and is built on Kotlin. There is currently no gradle right now.
 
 You can attain these through the Processing library installer, the installed libs in the user processing folder or find online by searching processing library jars.
 

@@ -5,7 +5,7 @@ import java.util.*
 
 class SimOptions {
     val DIM = 1000
-    val NEIGHBORHOOD_SIZE_SQUARED = DIM * 10.0f
+    val NEIGHBORHOOD_SIZE_SQUARED = DIM * 13.0f
     val AGENT_COUNT = DIM
     val AGENT_SIZE = 5
     val MAX_SPEED = 4.0f
@@ -14,7 +14,7 @@ class SimOptions {
     val FORCE_VECTOR_LENGTH = 70.0f
     var SEP_STR = .5f
     var COH_STR = .5f
-    var ALI_STR = .6f
+    var ALI_STR = .5f
 
     internal enum class CommandKeys {
         // TODO: FORCE[] -> FORCE[key]

@@ -9,11 +9,17 @@ internal class BoidForces(sep_str: Float, coh_str: Float, ali_str: Float) : Forc
     var coh: Vec3D? = null
     var ali: Vec3D? = null
 
+    private val sepDist: Float = 5000.0f
+    private val cohDist: Float = 6000.0f
+
     private fun separation(agent: GenericAgent, agents: List<GenericAgent>): Vec3D {
         sep = Vec3D()
         tail(agents).forEach(Consumer { partner: GenericAgent ->
-            val interp = agent.position.interpolateTo(partner.position, strengths!![0])
-            sep!!.addSelf(interp)
+            val partnerDist = agent.position.distanceToSquared(partner.position)
+            if (partnerDist < sepDist) {
+                val interp = agent.position.interpolateTo(partner.position, strengths!![0])
+                sep!!.addSelf(interp)
+            }
         })
         return sep!!
     }
@@ -21,8 +27,11 @@ internal class BoidForces(sep_str: Float, coh_str: Float, ali_str: Float) : Forc
     private fun cohesion(agent: GenericAgent, agents: List<GenericAgent>): Vec3D {
         coh = Vec3D()
         tail(agents).forEach(Consumer { partner: GenericAgent ->
-            val interp = agent.position.interpolateTo(partner.position, strengths!![1])
-            coh!!.addSelf(interp.inverted)
+            val partnerDist = agent.position.distanceToSquared(partner.position)
+            if (partnerDist > cohDist) {
+                val interp = agent.position.interpolateTo(partner.position, strengths!![1])
+                coh!!.addSelf(interp.inverted)
+            }
         })
         return coh!!
     }
