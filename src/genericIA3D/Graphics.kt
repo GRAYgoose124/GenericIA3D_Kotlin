@@ -9,7 +9,8 @@ import toxi.processing.ToxiclibsSupport
 import java.util.function.Consumer
 
 class Graphics(
-        private var parent_proc: PApplet, private var parent_sim: GenericIASimulation) {
+        private var parent_proc: PApplet,
+        private var parent_sim: GenericIASimulation) {
 
     // Cameras
     private var cam: Cameras? = null
@@ -46,6 +47,7 @@ class Graphics(
         parent_proc.fill(255f, 255f, 255f)
         parent_proc.text("FPS " + parent_proc.frameRate, 20f, 20f)
         parent_proc.text(parent_sim.lastKeyAction, 20f, 40f)
+
         for (i in parent_sim.so.forces_list.indices) {
             parent_proc.text(parent_sim.so.forces_list[i].toString(), 20f, 60 + ((i + 1) * 10).toFloat())
         }
@@ -55,8 +57,9 @@ class Graphics(
     private fun peasyDefaultCamera() {
         cam = Cameras(parent_proc)
         val lookat = intArrayOf(parent_proc.width / 2,
-                parent_proc.height / 2,
-                parent_sim.so.DIM / 2)
+                                parent_proc.height / 2,
+                                parent_sim.so.DIM / 2)
+
         cam!!.set3DCamera(parent_sim.so.DIM / 10.0f.toDouble(), 0, parent_sim.so.DIM / 2, lookat, true)
     }
 
@@ -70,45 +73,50 @@ class Graphics(
             parent_sim.so.FOLLOW_TOGGLED = false
         }
         // Camera target tracking. Currently broken, does not follow.
-        if (parent_sim.so.FOLLOW) {
+        if (parent_sim.so.FOLLOW)
             target = intArrayOf(camTarget!!.position.x.toInt(),
-                    camTarget.position.y.toInt(),
-                    camTarget.position.z.toInt())
-        }
+                                camTarget.position.y.toInt(),
+                                camTarget.position.z.toInt())
+
         return target
     }
 
-    fun showAgent(agent: GenericAgent, group_n: Int, gfx_type: String?, colorMatrix: Matrix4x4) {
+    fun showAgent(agent: GenericAgent, group_n: Int, colorMatrix: Matrix4x4) {
         val col = colorMatrix.applyTo(agent.position.add(agent.velocity)
-                .add(agent.acceleration))
+                             .add(agent.acceleration))
         parent_proc.fill(col.x, col.y, col.z)
-        if (parent_sim.so.TRAILS) agent.update_trail(parent_sim.so.TRAIL_SEG_LENGTH)
+
+        if (parent_sim.so.TRAILS) agent.updateTrail(parent_sim.so.TRAIL_SEG_LENGTH)
         if (parent_sim.so.GFX_TYPE == "toxic") toxicShowAgent(agent, col, group_n)
     }
 
     // Toxic Support
     private fun toxicShowAgent(agent: GenericAgent, colour: Vec3D, group_n: Int) {
         parent_proc.pushMatrix()
+
         parent_proc.fill(colour.x, colour.y, colour.z)
         parent_proc.stroke(colour.y, colour.z, colour.x)
         gfx!!.cone(Cone(agent.position, agent.velocity,
                 0.0f, parent_sim.so.AGENT_SIZE.toFloat(),
                 (parent_sim.so.AGENT_SIZE * 4).toFloat()),
                 5, false)
+
         if (parent_sim.so.TRAILS) toxicShowTrail(agent)
         if (parent_sim.so.SHOW_FORCE_VECTORS) toxicShowForceVectors(agent, group_n)
+
         if (parent_sim.so.SHOW_NEIGHBORS) {
-            agent.last_neighbors.forEach(Consumer { neighbor: GenericAgent ->
+            agent.lastNeighbors.forEach(Consumer { neighbor: GenericAgent ->
                 parent_proc.stroke(100f, 50f, 200f)
                 gfx!!.line(agent.position, neighbor.position)
             })
         }
+
         parent_proc.popMatrix()
     }
 
     private fun toxicShowForceVectors(agent: GenericAgent, group_n: Int) {
         var i = 1
-        for (force in agent.last_forces) {
+        for (force in agent.lastForces) {
             val colour = Vec3D(force)
             when (i) {
                 1 -> colour.x = 255f
@@ -118,8 +126,8 @@ class Graphics(
             if (!force.isZeroVector) {
                 parent_proc.stroke(colour.x, colour.y, colour.z)
                 gfx!!.line(agent.position, agent.position.add(
-                        force.normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH *
-                                parent_sim.so.forces_list[group_n].strengths!![i - 1])))
+                            force.normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH *
+                            parent_sim.so.forces_list[group_n].strengths!![i - 1])))
             }
             if (i > 3) {
                 i = 1
@@ -133,8 +141,7 @@ class Graphics(
                         .normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH)))
         parent_proc.stroke(120f, 120f, 255f)
         gfx!!.line(agent.position, agent.position.add(
-                agent.velocity
-                        .normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH / 2)))
+                    agent.velocity.normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH / 2)))
         parent_proc.stroke(0f, 0f, 0f)
     }
 

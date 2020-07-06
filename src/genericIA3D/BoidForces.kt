@@ -3,38 +3,37 @@ package genericIA3D
 import toxi.geom.Vec3D
 import java.util.*
 import java.util.function.Consumer
-import java.util.function.Function
 
 internal class BoidForces(sep_str: Float, coh_str: Float, ali_str: Float) : Forces() {
-    private var separation: Vec3D? = null
-    private var cohesion: Vec3D? = null
-    private var alignment: Vec3D? = null
+    var sep: Vec3D? = null
+    var coh: Vec3D? = null
+    var ali: Vec3D? = null
 
-    private fun separation(agents: List<GenericAgent>): Vec3D {
-        separation = Vec3D()
+    private fun separation(agent: GenericAgent, agents: List<GenericAgent>): Vec3D {
+        sep = Vec3D()
         tail(agents).forEach(Consumer { partner: GenericAgent ->
-            val interp = agents[0].position.interpolateTo(partner.position, strengths!![0])
-            separation!!.addSelf(interp)
+            val interp = agent.position.interpolateTo(partner.position, strengths!![0])
+            sep!!.addSelf(interp)
         })
-        return separation!!
+        return sep!!
     }
 
-    private fun cohesion(agents: List<GenericAgent>): Vec3D {
-        cohesion = Vec3D()
+    private fun cohesion(agent: GenericAgent, agents: List<GenericAgent>): Vec3D {
+        coh = Vec3D()
         tail(agents).forEach(Consumer { partner: GenericAgent ->
-            val interp = agents[0].position.interpolateTo(partner.position, strengths!![1])
-            cohesion!!.addSelf(interp.inverted)
+            val interp = agent.position.interpolateTo(partner.position, strengths!![1])
+            coh!!.addSelf(interp.inverted)
         })
-        return cohesion!!
+        return coh!!
     }
 
-    private fun align(agents: List<GenericAgent>): Vec3D {
-        alignment = Vec3D()
+    private fun align(agent: GenericAgent, agents: List<GenericAgent>): Vec3D {
+        ali = Vec3D()
         tail(agents).forEach(Consumer { partner: GenericAgent ->
-            val interp = agents[0].velocity.interpolateTo(partner.velocity, strengths!![1])
-            alignment!!.addSelf(interp)
+            val interp = agent.velocity.interpolateTo(partner.velocity, strengths!![1])
+            ali!!.addSelf(interp)
         })
-        return alignment!!
+        return ali!!
     }
 
     init {
@@ -42,9 +41,6 @@ internal class BoidForces(sep_str: Float, coh_str: Float, ali_str: Float) : Forc
         strengths!!.add(sep_str)
         strengths!!.add(coh_str)
         strengths!!.add(ali_str)
-        ops = ArrayList()
-        ops!!.add(Function { agents: List<GenericAgent> -> separation(agents) })
-        ops!!.add(Function { agents: List<GenericAgent> -> cohesion(agents) })
-        ops!!.add(Function { agents: List<GenericAgent> -> align(agents) })
+        ops = listOf(::separation, ::cohesion, ::align)
     }
 }

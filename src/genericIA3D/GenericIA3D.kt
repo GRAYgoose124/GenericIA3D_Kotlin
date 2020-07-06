@@ -14,6 +14,7 @@ class GenericIA3D : PApplet() {
             gias.runSketch()
         }
     }
+
     private var simulation: GenericIASimulation? = null
 
     override fun settings() {

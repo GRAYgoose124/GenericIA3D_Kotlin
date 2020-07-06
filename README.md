@@ -2,7 +2,7 @@
 
 This is a project I'm working on to act as a base for more complex intelligent agent interactions in 3D. Eventually it will have Variants including neural nets and rts type games.
 
-## Eclipse Java build path jars (Processing Reqs)
+## jars (Processing reqs)
 
 This project uses javasdk1.8+
 

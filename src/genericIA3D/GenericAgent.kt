@@ -5,40 +5,40 @@ import java.util.*
 import java.util.function.Consumer
 
 class GenericAgent(var position: Vec3D, var velocity: Vec3D, protected val parent_sim: GenericIASimulation) {
-    @JvmField
     var acceleration: Vec3D
-    @JvmField
     var trail: MutableList<Vec3D>
-    @JvmField
-    var last_forces: MutableList<Vec3D>
-    @JvmField
-    var last_neighbors: MutableList<GenericAgent>
+    var lastForces: MutableList<Vec3D>
+    var lastNeighbors: MutableList<GenericAgent>
 
     // Forces
-    fun apply_forces(group: List<GenericAgent>, forces: Forces, wrapping: Boolean) { // (forces)
+    fun applyForces(group: List<GenericAgent>, forces: Forces, wrapping: Boolean) { // (forces)
         acceleration = Vec3D() // acceleration.scale(0.5f); // TODO: deceleration drag?
-        last_forces = ArrayList()
-        last_neighbors = neighborhood(group)
-        if (last_neighbors.size < 1) return
-        for (i in forces.ops!!.indices) {
+        lastForces = ArrayList()
+        lastNeighbors = neighborhood(group)
+
+        if (lastNeighbors.size < 1) return
+        for (i in forces.ops.indices) {
             if (!parent_sim.so.FORCES_ON[i]) continue
-            val force = forces.ops!![i].apply(last_neighbors)
-            last_forces.add(force)
+            val force = forces.ops[i](this, lastNeighbors)
+            lastForces.add(force)
             acceleration.addSelf(force)
         }
+
         velocity.addSelf(acceleration.normalizeTo(parent_sim.so.MAX_SPEED))
         velocity.limit(parent_sim.so.MAX_SPEED)
+
         position.addSelf(velocity)
-        if (wrapping) wrap()
+
+        if (wrapping) wrap() // TODO: move to GIAS?
     }
 
     // Helpers
     private fun neighborhood(group: List<GenericAgent>): MutableList<GenericAgent> {
         val neighbors: MutableList<GenericAgent> = ArrayList()
-        neighbors.add(this) // ensure the first item is always the agent being acted on. FIX: HACK ALERT!
+
         group.forEach(Consumer { neighbor: GenericAgent ->
-            val dist_squared = position.distanceToSquared(neighbor.position)
-            if (dist_squared < parent_sim.so.NEIGHBORHOOD_SIZE_SQUARED) {
+            val distSquared = position.distanceToSquared(neighbor.position)
+            if (distSquared < parent_sim.so.NEIGHBORHOOD_SIZE_SQUARED) {
                 neighbors.add(neighbor)
             }
         })
@@ -75,11 +75,11 @@ class GenericAgent(var position: Vec3D, var velocity: Vec3D, protected val paren
         if (wrapped) {
             trail.clear()
             trail.add(Vec3D(position))
-            last_neighbors.clear()
+            lastNeighbors.clear()
         }
     }
 
-    fun update_trail(seg_length_squared: Float) {
+    fun updateTrail(seg_length_squared: Float) {
         if (trail[trail.size - 1].sub(position).magSquared() > seg_length_squared) {
             trail.add(Vec3D(position))
         }
@@ -90,8 +90,9 @@ class GenericAgent(var position: Vec3D, var velocity: Vec3D, protected val paren
 
     init {
         acceleration = Vec3D()
-        last_neighbors = ArrayList()
-        last_forces = ArrayList()
+        lastNeighbors = ArrayList()
+        lastForces = ArrayList()
+
         trail = ArrayList()
         trail.add(Vec3D(position))
     }
