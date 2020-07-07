@@ -1,8 +1,6 @@
 package genericIA3D
 
 import toxi.geom.Vec3D
-import java.util.*
-import java.util.function.Consumer
 import kotlin.collections.ArrayList
 
 class GenericAgent(var position: Vec3D, var velocity: Vec3D, protected val parent_sim: GenericIASimulation) {
@@ -12,7 +10,7 @@ class GenericAgent(var position: Vec3D, var velocity: Vec3D, protected val paren
     var lastNeighbors: MutableMap<GenericAgent, Float>
 
     // Forces
-    fun applyForces(group: List<GenericAgent>, forces: Forces, wrapping: Boolean) { // (forces)
+    fun applyForces(group: List<GenericAgent>, forces: Forces) { // (forces)
         acceleration = acceleration.scale(0.2f);
         lastForces = ArrayList()
         lastNeighbors = neighborhood(group)
@@ -30,7 +28,8 @@ class GenericAgent(var position: Vec3D, var velocity: Vec3D, protected val paren
 
         position.addSelf(velocity)
 
-        if (wrapping) wrap() // TODO: move to GIAS?
+        if (parent_sim.so.WRAPPING) wrap() // TODO: move to GIAS?
+        if (parent_sim.so.TRAILS) updateTrail()
     }
 
     // Helpers
@@ -48,29 +47,29 @@ class GenericAgent(var position: Vec3D, var velocity: Vec3D, protected val paren
 
     private fun wrap() {
         var wrapped = false
-        val DIM = parent_sim.so.DIM.toFloat()
-        if (position.x < -DIM) {
-            position.x = DIM
+        val dim = parent_sim.so.DIM.toFloat()
+        if (position.x < -dim) {
+            position.x = dim
             wrapped = true
         }
-        if (position.y < -DIM) {
-            position.y = DIM
+        if (position.y < -dim) {
+            position.y = dim
             wrapped = true
         }
-        if (position.z < -DIM) {
-            position.z = DIM
+        if (position.z < -dim) {
+            position.z = dim
             wrapped = true
         }
-        if (position.y > DIM) {
-            position.y = -DIM
+        if (position.y > dim) {
+            position.y = -dim
             wrapped = true
         }
-        if (position.x > DIM) {
-            position.x = -DIM
+        if (position.x > dim) {
+            position.x = -dim
             wrapped = true
         }
-        if (position.z > DIM) {
-            position.z = -DIM
+        if (position.z > dim) {
+            position.z = -dim
             wrapped = true
         }
         if (wrapped) {
@@ -80,8 +79,8 @@ class GenericAgent(var position: Vec3D, var velocity: Vec3D, protected val paren
         }
     }
 
-    fun updateTrail(seg_length_squared: Float) {
-        if (trail[trail.size - 1].sub(position).magSquared() > seg_length_squared) {
+    private fun updateTrail() {
+        if (trail[trail.size - 1].sub(position).magSquared() > parent_sim.so.TRAIL_SEG_LENGTH) {
             trail.add(Vec3D(position))
         }
         if (trail.size > 2 * parent_sim.so.MAX_TRAIL_SEGMENTS) {

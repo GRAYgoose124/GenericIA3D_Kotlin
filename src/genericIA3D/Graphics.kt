@@ -86,7 +86,6 @@ class Graphics(
                              .add(agent.acceleration))
         parent_proc.fill(col.x, col.y, col.z)
 
-        if (parent_sim.so.TRAILS) agent.updateTrail(parent_sim.so.TRAIL_SEG_LENGTH)
         if (parent_sim.so.GFX_TYPE == "toxic") toxicShowAgent(agent, col, group_n)
     }
 
@@ -102,23 +101,25 @@ class Graphics(
                 3, false)
 
         if (parent_sim.so.TRAILS) toxicShowTrail(agent)
+        if (parent_sim.so.SHOW_NEIGHBORS) toxicShowNeighbors(agent)
         if (parent_sim.so.SHOW_FORCE_VECTORS) toxicShowForceVectors(agent, group_n)
 
-        if (parent_sim.so.SHOW_NEIGHBORS) {
-            agent.lastNeighbors.forEach { neighbor: Map.Entry<GenericAgent, Float> ->
-                parent_proc.stroke(100f, 50f, 200f)
-                if (neighbor.key.position.magSquared() > parent_sim.so.MAX_SPEED * parent_sim.so.MAX_SPEED)
-                    gfx!!.line(agent.position, neighbor.key.position)
-            }
-        }
 
         parent_proc.popMatrix()
+    }
+
+    private fun toxicShowNeighbors(agent: GenericAgent ) {
+        parent_proc.stroke(100f, 50f, 200f)
+        agent.lastNeighbors.keys.forEach { neighbor: GenericAgent ->
+            gfx!!.line(agent.position, neighbor.position)
+        }
+
     }
 
     private fun toxicShowForceVectors(agent: GenericAgent, group_n: Int) {
         var i = 1
 
-        agent.lastForces.stream().forEach { force ->
+        agent.lastForces.forEach { force ->
             val colour = Vec3D(force)
             when (i) {
                 1 -> colour.x = 255f
@@ -129,13 +130,13 @@ class Graphics(
                 6 -> {colour.y = 255f; colour.z = 255f}
             }
 
-            if (!force.isZeroVector) { // parent_sim.so.SHOW_ALL_FORCE_VECTORS == true or somehow breaks!?!
+            if (!force.isZeroVector) { // parent_sim.so.SHOW_ALL_FORCE_VECTORS == true or somehow breaks!?! wtf?
                 parent_proc.stroke(colour.x, colour.y, colour.z)
                 gfx!!.line(agent.position, agent.position.add(
                             force.copy().normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH *
                             parent_sim.so.forces_list[group_n].strengths!![i - 1])))
             }
-            if (i > 3) {
+            if (i >= parent_sim.so.forces_list[group_n].strengths!!.size) {
                 i = 1
             } else {
                 i++
@@ -151,11 +152,10 @@ class Graphics(
         gfx!!.line(agent.position, agent.position.add(
                     agent.velocity.copy()
                             .normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH / 2)))
-
-        parent_proc.stroke(0f, 0f, 0f)
     }
 
     private fun toxicShowTrail(agent: GenericAgent) {
+
         if (agent.trail.size < 2) {
             return
         }
