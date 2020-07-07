@@ -99,16 +99,17 @@ class Graphics(
         gfx!!.cone(Cone(agent.position, agent.velocity,
                 0.0f, parent_sim.so.AGENT_SIZE.toFloat(),
                 (parent_sim.so.AGENT_SIZE * 4).toFloat()),
-                5, false)
+                3, false)
 
         if (parent_sim.so.TRAILS) toxicShowTrail(agent)
         if (parent_sim.so.SHOW_FORCE_VECTORS) toxicShowForceVectors(agent, group_n)
 
         if (parent_sim.so.SHOW_NEIGHBORS) {
-            agent.lastNeighbors.forEach(Consumer { neighbor: GenericAgent ->
+            agent.lastNeighbors.forEach { neighbor: Map.Entry<GenericAgent, Float> ->
                 parent_proc.stroke(100f, 50f, 200f)
-                gfx!!.line(agent.position, neighbor.position)
-            })
+                if (neighbor.key.position.magSquared() > parent_sim.so.MAX_SPEED * parent_sim.so.MAX_SPEED)
+                    gfx!!.line(agent.position, neighbor.key.position)
+            }
         }
 
         parent_proc.popMatrix()
@@ -116,17 +117,22 @@ class Graphics(
 
     private fun toxicShowForceVectors(agent: GenericAgent, group_n: Int) {
         var i = 1
-        for (force in agent.lastForces) {
+
+        agent.lastForces.stream().forEach { force ->
             val colour = Vec3D(force)
             when (i) {
                 1 -> colour.x = 255f
                 2 -> colour.y = 255f
                 3 -> colour.z = 255f
+                4 -> {colour.x = 255f; colour.y = 255f}
+                5 -> {colour.x = 255f; colour.z = 255f}
+                6 -> {colour.y = 255f; colour.z = 255f}
             }
-            if (!force.isZeroVector) {
+
+            if (!force.isZeroVector) { // parent_sim.so.SHOW_ALL_FORCE_VECTORS == true or somehow breaks!?!
                 parent_proc.stroke(colour.x, colour.y, colour.z)
                 gfx!!.line(agent.position, agent.position.add(
-                            force.normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH *
+                            force.copy().normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH *
                             parent_sim.so.forces_list[group_n].strengths!![i - 1])))
             }
             if (i > 3) {
@@ -135,13 +141,17 @@ class Graphics(
                 i++
             }
         }
+
         parent_proc.stroke(255f, 255f, 255f)
         gfx!!.line(agent.position, agent.position.add(
-                agent.acceleration
+                agent.acceleration.copy()
                         .normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH)))
+
         parent_proc.stroke(120f, 120f, 255f)
         gfx!!.line(agent.position, agent.position.add(
-                    agent.velocity.normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH / 2)))
+                    agent.velocity.copy()
+                            .normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH / 2)))
+
         parent_proc.stroke(0f, 0f, 0f)
     }
 

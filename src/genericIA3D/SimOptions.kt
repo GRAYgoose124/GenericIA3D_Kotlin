@@ -6,6 +6,7 @@ import java.util.*
 class SimOptions {
     val DIM = 1000
     val NEIGHBORHOOD_SIZE_SQUARED = DIM * 13.0f
+    val NEIGHBORHOOD_COUNT = 10f
     val AGENT_COUNT = DIM
     val AGENT_SIZE = 5
     val MAX_SPEED = 4.0f
@@ -32,6 +33,7 @@ class SimOptions {
     var TRAILS = false
     var SHOW_NEIGHBORS = false
     var SHOW_FORCE_VECTORS = true
+    var SHOW_ALL_FORCE_VECTORS = false
     var GFX_TYPE = "toxic"
     var CAM_TYPE = "peasy"
     val colorMatrix = Matrix4x4().scale(255f / (DIM * 2).toDouble())

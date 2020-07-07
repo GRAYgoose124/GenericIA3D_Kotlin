@@ -51,6 +51,10 @@ class GenericIA3D : PApplet() {
                 simulation!!.so.SHOW_FORCE_VECTORS = !simulation!!.so.SHOW_FORCE_VECTORS
                 simulation!!.lastKeyAction = "Show FVectors = " + simulation!!.so.SHOW_FORCE_VECTORS
             }
+            'a' -> {
+                simulation!!.so.SHOW_ALL_FORCE_VECTORS = !simulation!!.so.SHOW_ALL_FORCE_VECTORS
+                simulation!!.lastKeyAction = "Show All FVectors = " + simulation!!.so.SHOW_ALL_FORCE_VECTORS
+            }
             'n' -> {
                 simulation!!.so.SHOW_NEIGHBORS = !simulation!!.so.SHOW_NEIGHBORS
                 simulation!!.lastKeyAction = "Show Neighbors = " + simulation!!.so.SHOW_NEIGHBORS

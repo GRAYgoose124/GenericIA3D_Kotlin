@@ -6,7 +6,7 @@ import kotlin.reflect.KFunction2
 
 open class Forces {
     var strengths: MutableList<Float>? = null
-    var ops: List<KFunction2<GenericAgent, List<GenericAgent>, Vec3D>>
+    var ops: List<KFunction2<GenericAgent, MutableMap<GenericAgent, Float>, Vec3D>>
 
     constructor() {}
     constructor(strength: Float) {
@@ -14,7 +14,7 @@ open class Forces {
         strengths!!.add(strength)
     }
 
-    fun positionForce(agent: GenericAgent, agents: List<GenericAgent>): Vec3D {
+    fun positionForce(agent: GenericAgent, agents: MutableMap<GenericAgent, Float>): Vec3D {
         val acceleration = Vec3D()
         acceleration.addSelf(agent.position).scale(strengths!![0])
         return acceleration
@@ -32,3 +32,4 @@ open class Forces {
         ops = listOf(::positionForce)
     }
 }
+// TODO: Move force strengths from SimOpts to *Forces?

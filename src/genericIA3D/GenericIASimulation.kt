@@ -35,10 +35,13 @@ class GenericIASimulation internal constructor(
     }
 
     private fun updateGroup(group_n: Int, forces: Forces, colour: Matrix4x4) {
-        groups[group_n].forEach(Consumer { a: GenericAgent ->
+        groups[group_n].parallelStream().forEach { a: GenericAgent ->
             if (!so.PAUSE) a.applyForces(groups[group_n], forces, so.WRAPPING)
+        }
+
+        groups[group_n].forEach { a: GenericAgent ->
             gfx.showAgent(a, group_n, colour)
-        })
+        }
     }
 
     private fun updateGroups(colour: Matrix4x4) {
