@@ -1,10 +1,11 @@
-package genericIA3D
+package genericIA3D.forces.base
 
+import genericIA3D.agents.GenericAgent
 import toxi.geom.Vec3D
 import java.util.*
 import kotlin.reflect.KFunction2
 
-open class Forces {
+open class ForcesPrimitive {
     var strengths: MutableList<Float>? = null
     var ops: List<KFunction2<GenericAgent, MutableMap<GenericAgent, Float>, Vec3D>>
 
@@ -14,7 +15,7 @@ open class Forces {
         strengths!!.add(strength)
     }
 
-    fun positionForce(agent: GenericAgent, agents: MutableMap<GenericAgent, Float>): Vec3D {
+    private fun positionForce(agent: GenericAgent, agents: MutableMap<GenericAgent, Float>): Vec3D {
         val acceleration = Vec3D()
         acceleration.addSelf(agent.position).scale(strengths!![0])
         return acceleration

@@ -1,21 +1,20 @@
 package genericIA3D
 
+import genericIA3D.forces.demo.BoidForces
+import genericIA3D.forces.base.FlowForces
+import genericIA3D.forces.base.ForcesPrimitive
 import toxi.geom.Matrix4x4
 import java.util.*
 
 class SimOptions {
-    val DIM = 1000
-    val NEIGHBORHOOD_SIZE_SQUARED = DIM * 13.0f
-    val NEIGHBORHOOD_COUNT = 10f
-    val AGENT_COUNT = DIM
+    val DIM = 1500
+    val NEIGHBORHOOD_SIZE_SQUARED = 10000.0f
+    val AGENT_COUNT = 800
     val AGENT_SIZE = 5
     val MAX_SPEED = 4.0f
-    var MAX_TRAIL_SEGMENTS = 20
-    val TRAIL_SEG_LENGTH = 35.0f
-    val FORCE_VECTOR_LENGTH = 70.0f
-    var SEP_STR = .5f
-    var COH_STR = .5f
-    var ALI_STR = .5f
+    var MAX_TRAIL_SEGMENTS = 25
+    val TRAIL_SEG_LENGTH = 200.0f
+    val FORCE_VECTOR_LENGTH = 100.0f
 
     internal enum class CommandKeys {
         // TODO: FORCE[] -> FORCE[key]
@@ -23,7 +22,7 @@ class SimOptions {
     }
 
     var FORCES_ON = booleanArrayOf(true, true, true)
-    var forces_list: MutableList<Forces> = ArrayList()
+    var forcesList: MutableList<ForcesPrimitive> = ArrayList()
     var PAUSE = false
     var DEBUG = false
     var WRAPPING = true
@@ -37,13 +36,14 @@ class SimOptions {
     var GFX_TYPE = "toxic"
     var CAM_TYPE = "peasy"
     val colorMatrix = Matrix4x4().scale(255f / (DIM * 2).toDouble())
-                                 .translate(DIM.toDouble(), DIM.toDouble(), DIM.toDouble())
+            .translate(DIM.toDouble(), DIM.toDouble(), DIM.toDouble())!!
 
     init {
-        val bf = BoidForces(SEP_STR, COH_STR, ALI_STR)
-        forces_list.add(bf)
+        val bf = BoidForces()
+        forcesList.add(bf)
 
-        // val f = new Forces(MAX_SPEED)
-        // forces_list.add(f)
+        val ef = FlowForces()
+        //val f = Forces(MAX_SPEED)
+        //forces_list.add(f)
     }
 }

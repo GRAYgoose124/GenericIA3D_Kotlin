@@ -1,16 +1,16 @@
-package genericIA3D
+package genericIA3D.sim
 
 import culebra.viz.Cameras
+import genericIA3D.agents.GenericAgent
 import processing.core.PApplet
 import toxi.geom.Cone
 import toxi.geom.Matrix4x4
 import toxi.geom.Vec3D
 import toxi.processing.ToxiclibsSupport
-import java.util.function.Consumer
 
 class Graphics(
-        private var parent_proc: PApplet,
-        private var parent_sim: GenericIASimulation) {
+        private var parentProc: PApplet,
+        private var parentSim: GenericIASimulation) {
 
     // Cameras
     private var cam: Cameras? = null
@@ -26,12 +26,12 @@ class Graphics(
 
     fun updateType(gfx_type: String?) {
         when (gfx_type) {
-            "toxic" -> gfx = ToxiclibsSupport(parent_proc)
+            "toxic" -> gfx = ToxiclibsSupport(parentProc)
         }
     }
 
     fun drawCamera() {
-        when (parent_sim.so.CAM_TYPE) {
+        when (parentSim.so.CAM_TYPE) {
             "peasy" -> peasyDrawCamera()
         }
     }
@@ -43,24 +43,24 @@ class Graphics(
 
         // Show HUD
         cam!!.beginHUD()
-        parent_proc.textSize(12f)
-        parent_proc.fill(255f, 255f, 255f)
-        parent_proc.text("FPS " + parent_proc.frameRate, 20f, 20f)
-        parent_proc.text(parent_sim.lastKeyAction, 20f, 40f)
+        parentProc.textSize(12f)
+        parentProc.fill(255f, 255f, 255f)
+        parentProc.text("FPS " + parentProc.frameRate, 20f, 20f)
+        parentProc.text(parentSim.lastKeyAction, 20f, 40f)
 
-        for (i in parent_sim.so.forces_list.indices) {
-            parent_proc.text(parent_sim.so.forces_list[i].toString(), 20f, 60 + ((i + 1) * 10).toFloat())
+        for (i in parentSim.so.forcesList.indices) {
+            parentProc.text(parentSim.so.forcesList[i].toString(), 20f, 60 + ((i + 1) * 10).toFloat())
         }
         cam!!.endHUD()
     }
 
     private fun peasyDefaultCamera() {
-        cam = Cameras(parent_proc)
-        val lookat = intArrayOf(parent_proc.width / 2,
-                                parent_proc.height / 2,
-                                parent_sim.so.DIM / 2)
+        cam = Cameras(parentProc)
+        val lookat = intArrayOf(parentProc.width / 2,
+                                parentProc.height / 2,
+                                parentSim.so.DIM / 2)
 
-        cam!!.set3DCamera(parent_sim.so.DIM / 10.0f.toDouble(), 0, parent_sim.so.DIM / 2, lookat, true)
+        cam!!.set3DCamera(parentSim.so.DIM / 10.0f.toDouble(), 0, parentSim.so.DIM / 2, lookat, true)
     }
 
     private fun peasyCamTarget(): IntArray? {
@@ -68,12 +68,12 @@ class Graphics(
         var camTarget: GenericAgent? = null
 
         // Select follow target and update follow cam if toggled.
-        if (parent_sim.so.FOLLOW && parent_sim.so.FOLLOW_TOGGLED) {
-            camTarget = parent_sim.groups[0][0]
-            parent_sim.so.FOLLOW_TOGGLED = false
+        if (parentSim.so.FOLLOW && parentSim.so.FOLLOW_TOGGLED) {
+            camTarget = parentSim.groups[0][0]
+            parentSim.so.FOLLOW_TOGGLED = false
         }
         // Camera target tracking. Currently broken, does not follow.
-        if (parent_sim.so.FOLLOW)
+        if (parentSim.so.FOLLOW)
             target = intArrayOf(camTarget!!.position.x.toInt(),
                                 camTarget.position.y.toInt(),
                                 camTarget.position.z.toInt())
@@ -84,32 +84,32 @@ class Graphics(
     fun showAgent(agent: GenericAgent, group_n: Int, colorMatrix: Matrix4x4) {
         val col = colorMatrix.applyTo(agent.position.add(agent.velocity)
                              .add(agent.acceleration))
-        parent_proc.fill(col.x, col.y, col.z)
+        parentProc.fill(col.x, col.y, col.z)
 
-        if (parent_sim.so.GFX_TYPE == "toxic") toxicShowAgent(agent, col, group_n)
+        if (parentSim.so.GFX_TYPE == "toxic") toxicShowAgent(agent, col, group_n)
     }
 
     // Toxic Support
     private fun toxicShowAgent(agent: GenericAgent, colour: Vec3D, group_n: Int) {
-        parent_proc.pushMatrix()
+        parentProc.pushMatrix()
 
-        parent_proc.fill(colour.x, colour.y, colour.z)
-        parent_proc.stroke(colour.y, colour.z, colour.x)
+        parentProc.fill(colour.x, colour.y, colour.z)
+        parentProc.stroke(colour.y, colour.z, colour.x)
         gfx!!.cone(Cone(agent.position, agent.velocity,
-                0.0f, parent_sim.so.AGENT_SIZE.toFloat(),
-                (parent_sim.so.AGENT_SIZE * 4).toFloat()),
+                0.0f, parentSim.so.AGENT_SIZE.toFloat(),
+                (parentSim.so.AGENT_SIZE * 4).toFloat()),
                 3, false)
 
-        if (parent_sim.so.TRAILS) toxicShowTrail(agent)
-        if (parent_sim.so.SHOW_NEIGHBORS) toxicShowNeighbors(agent)
-        if (parent_sim.so.SHOW_FORCE_VECTORS) toxicShowForceVectors(agent, group_n)
+        if (parentSim.so.TRAILS) toxicShowTrail(agent)
+        if (parentSim.so.SHOW_NEIGHBORS) toxicShowNeighbors(agent)
+        if (parentSim.so.SHOW_FORCE_VECTORS) toxicShowForceVectors(agent, group_n)
 
 
-        parent_proc.popMatrix()
+        parentProc.popMatrix()
     }
 
-    private fun toxicShowNeighbors(agent: GenericAgent ) {
-        parent_proc.stroke(100f, 50f, 200f)
+    private fun toxicShowNeighbors(agent: GenericAgent) {
+        parentProc.stroke(100f, 50f, 200f)
         agent.lastNeighbors.keys.forEach { neighbor: GenericAgent ->
             gfx!!.line(agent.position, neighbor.position)
         }
@@ -131,43 +131,39 @@ class Graphics(
             }
 
             if (!force.isZeroVector) { // parent_sim.so.SHOW_ALL_FORCE_VECTORS == true or somehow breaks!?! wtf?
-                parent_proc.stroke(colour.x, colour.y, colour.z)
+                parentProc.stroke(colour.x, colour.y, colour.z)
                 gfx!!.line(agent.position, agent.position.add(
-                            force.copy().normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH *
-                            parent_sim.so.forces_list[group_n].strengths!![i - 1])))
+                            force.copy().normalizeTo(parentSim.so.FORCE_VECTOR_LENGTH *
+                            parentSim.so.forcesList[group_n].strengths!![i - 1])))
             }
-            if (i >= parent_sim.so.forces_list[group_n].strengths!!.size) {
+            if (i >= parentSim.so.forcesList[group_n].strengths!!.size) {
                 i = 1
             } else {
                 i++
             }
         }
 
-        parent_proc.stroke(255f, 255f, 255f)
+        parentProc.stroke(255f, 255f, 255f)
         gfx!!.line(agent.position, agent.position.add(
                 agent.acceleration.copy()
-                        .normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH)))
+                        .normalizeTo(parentSim.so.FORCE_VECTOR_LENGTH * parentSim.so.forcesList[group_n].strengths!!.sum())))
 
-        parent_proc.stroke(120f, 120f, 255f)
+        parentProc.stroke(120f, 120f, 255f)
         gfx!!.line(agent.position, agent.position.add(
                     agent.velocity.copy()
-                            .normalizeTo(parent_sim.so.FORCE_VECTOR_LENGTH / 2)))
+                            .normalizeTo(parentSim.so.FORCE_VECTOR_LENGTH / 2)))
     }
 
     private fun toxicShowTrail(agent: GenericAgent) {
+        if (agent.trail.size < 2) { return }
 
-        if (agent.trail.size < 2) {
-            return
-        }
-        var i = 0
-        while (i < agent.trail.size - 1) {
+        for (i in 0..(agent.trail.size - 1)) {
             gfx!!.line(agent.trail[i], agent.trail[i + 1])
-            i += 1
         }
     }
 
     init {
-        updateCam(parent_sim.so.CAM_TYPE)
-        updateType(parent_sim.so.GFX_TYPE)
+        updateCam(parentSim.so.CAM_TYPE)
+        updateType(parentSim.so.GFX_TYPE)
     }
 }

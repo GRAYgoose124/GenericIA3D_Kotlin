@@ -1,5 +1,6 @@
 package genericIA3D
 
+import genericIA3D.sim.GenericIASimulation
 import processing.core.PApplet
 import processing.event.MouseEvent
 
