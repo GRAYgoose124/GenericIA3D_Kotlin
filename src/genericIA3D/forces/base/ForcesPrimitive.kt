@@ -9,7 +9,7 @@ open class ForcesPrimitive {
     var strengths: MutableList<Float>? = null
     var ops: List<KFunction2<GenericAgent, MutableMap<GenericAgent, Float>, Vec3D>>
 
-    constructor() {}
+    constructor()
     constructor(strength: Float) {
         strengths = ArrayList()
         strengths!!.add(strength)

@@ -1,4 +1,4 @@
-package genericIA3D
+package genericIA3D.app
 
 import genericIA3D.forces.demo.BoidForces
 import genericIA3D.forces.base.FlowForces
@@ -16,13 +16,10 @@ class SimOptions {
     val TRAIL_SEG_LENGTH = 200.0f
     val FORCE_VECTOR_LENGTH = 100.0f
 
-    internal enum class CommandKeys {
-        // TODO: FORCE[] -> FORCE[key]
-        PAUSE, DEBUG, WRAPPING, FOLLOW, OBSTACLES, TRAILS, SHOW_NEIGHBORS, SHOW_FORCE_VECTORS
-    }
+    // TODO: FORCE[] -> FORCE[key]
+    var forcesList: MutableList<ForcesPrimitive> = ArrayList()
 
     var FORCES_ON = booleanArrayOf(true, true, true)
-    var forcesList: MutableList<ForcesPrimitive> = ArrayList()
     var PAUSE = false
     var DEBUG = false
     var WRAPPING = true
@@ -35,8 +32,8 @@ class SimOptions {
     var SHOW_ALL_FORCE_VECTORS = false
     var GFX_TYPE = "toxic"
     var CAM_TYPE = "peasy"
-    val colorMatrix = Matrix4x4().scale(255f / (DIM * 2).toDouble())
-            .translate(DIM.toDouble(), DIM.toDouble(), DIM.toDouble())!!
+    val colorMatrix = Matrix4x4().scale(255f / (DIM * 2.0))
+            .translate(DIM.toDouble(), DIM.toDouble(), DIM.toDouble())
 
     init {
         val bf = BoidForces()
@@ -46,4 +43,4 @@ class SimOptions {
         //val f = Forces(MAX_SPEED)
         //forces_list.add(f)
     }
-}
+} // TODO: change to json format and reduce as much bloat.

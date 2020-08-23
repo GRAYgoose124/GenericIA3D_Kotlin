@@ -8,11 +8,12 @@ import kotlin.collections.ArrayList
 
 open class GenericAgent(var position: Vec3D,
                         var velocity: Vec3D,
-                        protected val parent_sim: GenericIASimulation, var forceNeighbors: ForcesPrimitive) {
+                        private val parent_sim: GenericIASimulation, var forceNeighbors: ForcesPrimitive) {
     var acceleration: Vec3D
     var trail: MutableList<Vec3D>
     var lastForces: MutableList<Vec3D>
     var lastNeighbors: MutableMap<GenericAgent, Float>
+    var wrapped = false
 
     // Forces
     fun applyForces(group: List<GenericAgent>, forces: ForcesPrimitive) { // (forces)
@@ -36,10 +37,17 @@ open class GenericAgent(var position: Vec3D,
         position.addSelf(velocity)
 
         if (parent_sim.so.TRAILS) updateTrail()
-        if (parent_sim.so.WRAPPING) wrap() // TODO: move to GIAS?
     }
 
     // Helpers
+    private fun updateTrail() {
+        if (trail[trail.size - 1].sub(position).magSquared() > parent_sim.so.TRAIL_SEG_LENGTH)
+            trail.add(Vec3D(position))
+
+        if (trail.size > 2 * parent_sim.so.MAX_TRAIL_SEGMENTS)
+            trail.removeAt(0)
+    }
+
     private fun neighborhood(group: List<GenericAgent>): MutableMap<GenericAgent, Float> {
         val neighbors: MutableMap<GenericAgent, Float> = mutableMapOf()
 
@@ -52,41 +60,23 @@ open class GenericAgent(var position: Vec3D,
         return neighbors
     }
 
-    private fun wrap() {
-        var wrapped = false
+    fun wrap() {
         val dim = parent_sim.so.DIM.toFloat() // TODO: <=/>= mostly? fixes wrapping neighbors bug
 
-        if (position.x < -dim) { // But now trails disappear at edges and they still want to gather at dim edges/ center.
-            position.x = dim
-            wrapped = true }
-        if (position.y < -dim) {
-            position.y = dim
-            wrapped = true }
-        if (position.z < -dim) {
-            position.z = dim
-            wrapped = true }
-        if (position.y > dim) {
-            position.y = -dim
-            wrapped = true }
-        if (position.x > dim) {
-            position.x = -dim
-            wrapped = true }
-        if (position.z > dim) {
-            position.z = -dim
-            wrapped = true }
+        wrapped = true
+        when {
+            position.x < -dim -> position.x = dim
+            position.y < -dim -> position.y = dim
+            position.z < -dim -> position.z = dim
+            position.y > dim -> position.y = -dim
+            position.x > dim -> position.x = -dim
+            position.z > dim -> position.z = -dim
+            else -> wrapped = false
+        }
 
         if (wrapped) {
             trail.clear()
             trail.add(Vec3D(position))
-            lastNeighbors.clear() }
-    }
-
-    private fun updateTrail() {
-        if (trail[trail.size - 1].sub(position).magSquared() > parent_sim.so.TRAIL_SEG_LENGTH) {
-            trail.add(Vec3D(position))
-        }
-        if (trail.size > 2 * parent_sim.so.MAX_TRAIL_SEGMENTS) {
-            trail.removeAt(0)
         }
     }
 

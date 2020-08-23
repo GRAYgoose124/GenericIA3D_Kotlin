@@ -5,7 +5,7 @@ import genericIA3D.forces.base.ForcesPrimitive
 import toxi.geom.Vec3D
 import java.util.*
 
-internal class BoidForces() : ForcesPrimitive() {
+internal class BoidForces : ForcesPrimitive() {
     private var sep: Vec3D? = null
     private var coh: Vec3D? = null
     private var ali: Vec3D? = null

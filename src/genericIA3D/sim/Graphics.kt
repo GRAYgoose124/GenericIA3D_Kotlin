@@ -10,7 +10,7 @@ import toxi.processing.ToxiclibsSupport
 
 class Graphics(
         private var parentProc: PApplet,
-        private var parentSim: GenericIASimulation) {
+        private var parentSim: GenericIASimulation) { // TODO: breakup camera, drawing. Add obstacles/enviro meshes(detection...)
 
     // Cameras
     private var cam: Cameras? = null
@@ -111,7 +111,8 @@ class Graphics(
     private fun toxicShowNeighbors(agent: GenericAgent) {
         parentProc.stroke(100f, 50f, 200f)
         agent.lastNeighbors.keys.forEach { neighbor: GenericAgent ->
-            gfx!!.line(agent.position, neighbor.position)
+            if (!agent.wrapped and !neighbor.wrapped)
+                gfx!!.line(agent.position, neighbor.position)
         }
 
     }
@@ -125,7 +126,7 @@ class Graphics(
                 1 -> colour.x = 255f
                 2 -> colour.y = 255f
                 3 -> colour.z = 255f
-                4 -> {colour.x = 255f; colour.y = 255f}
+                4 -> {colour.x = 255f; colour.y = 0f}
                 5 -> {colour.x = 255f; colour.z = 255f}
                 6 -> {colour.y = 255f; colour.z = 255f}
             }
@@ -157,7 +158,7 @@ class Graphics(
     private fun toxicShowTrail(agent: GenericAgent) {
         if (agent.trail.size < 2) { return }
 
-        for (i in 0..(agent.trail.size - 1)) {
+        for (i in 0 until (agent.trail.size - 1)) {
             gfx!!.line(agent.trail[i], agent.trail[i + 1])
         }
     }
